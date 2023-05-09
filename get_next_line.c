@@ -6,25 +6,81 @@
 /*   By: jihalee <jihalee@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/09 15:50:05 by jihalee           #+#    #+#             */
-/*   Updated: 2023/05/09 18:01:11 by jihalee          ###   ########.fr       */
+/*   Updated: 2023/05/09 23:09:59 by jihalee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+#include <stdio.h>
 
-void	*ft_calloc(size_t nmemb, size_t size)
+char	*ft_strchr(const char *s, int c)
 {
-	void	*result;
-	size_t	total;
+	size_t	i;
+	char	ch;
 
-	total = size * nmemb;
-	if (size != 0 && nmemb != 0 && (total < nmemb || total < size))
+	ch = c;
+	i = 0;
+	while (s[i])
+	{
+		if (s[i] == ch)
+			return (&((char *)s)[i]);
+		i++;
+	}
+	if (c == '\0')
+		return (&(((char *)s)[i]));
+	return (0);
+}
+
+void	ft_lstclear(t_list **lst, void (*del)(void *))
+{
+	t_list	*current;
+	t_list	*next;
+
+	if (lst == 0)
+		return ;
+	if (del == 0)
+		return ;
+	current = *lst;
+	while (current)
+	{
+		next = current->next;
+		del(current->content);
+		free(current);
+		current = next;
+	}
+	*lst = 0;
+}
+
+void	ft_lstadd_back(t_list **lst, t_list *new)
+{
+	if (lst == 0 || new == 0)
+		return ;
+	if (*lst == 0)
+		*lst = new;
+	else
+	{
+		while ((*lst)->next)
+			lst = &((*lst)->next);
+		(*lst)->next = new;
+	}
+}
+
+t_list	*ft_lstnew(void *content)
+{
+	t_list	*new;
+	char	*eol;
+
+	new = (t_list *)malloc(sizeof (t_list));
+	if (new == 0)
 		return (NULL);
-	result = (void *)malloc(total);
-	if (result == 0)
-		return (0);
-	ft_bzero(result, total);
-	return (result);
+	new->next = 0;
+	new->content = content;
+	new->eol = 0;
+	new->eof = 0;
+	eol = ft_strchr((char *)content, '\n');
+	if (eol != 0)
+		new->eol = 1;
+	return (new);
 }
 
 char	*ft_strdup(const char *s)
@@ -49,24 +105,6 @@ char	*ft_strdup(const char *s)
 	return (new_string);
 }
 
-char	*ft_strchr(const char *s, int c)
-{
-	size_t	i;
-	char	ch;
-
-	ch = c;
-	i = 0;
-	while (s[i])
-	{
-		if (s[i] == ch)
-			return (&((char *)s)[i]);
-		i++;
-	}
-	if (c == '\0')
-		return (&(((char *)s)[i]));
-	return (0);
-}
-
 int	ft_strlen(char const *str)
 {
 	int	i;
@@ -77,60 +115,44 @@ int	ft_strlen(char const *str)
 	return (i);
 }
 
-char	*ft_substr(char const *s, unsigned int start, size_t len)
-{
-	char	*sub;
-	size_t	i;
+#include <string.h>
 
-	if (start >= ft_strlen(s))
+void	ft_lstprint(t_list *lst)
+{
+	while (lst)
 	{
-		sub = (char *)malloc(sizeof (char) * 1);
-		if (sub != 0)
-			sub[0] = '\0';
-		return (sub);
+		printf("%s", (char *)(lst->content));
+		printf("%d", lst->eol);
+		lst = lst->next;
 	}
-	else if (len > ft_strlen(s + start))
-		sub = (char *)malloc(sizeof (char) * (ft_strlen(s + start) + 1));
-	else
-		sub = (char *)malloc(sizeof (char) * (len + 1));
-	if (sub == 0)
-		return (NULL);
-	i = 0;
-	while (i < len && s[start + i] && start < ft_strlen(s))
-	{
-		sub[i] = s[(size_t)start + i];
-		i++;
-	}
-	sub[i] = '\0';
-	return (sub);
 }
 
-char	*append(char *s1, char const *s2)
+void	extract_strs(t_list *first, char *result, char *str)
 {
 	int		i;
 	int		j;
-	int		len;
-	char	*result;
+	t_list	*lst;
 
-	len = ft_strlen(s1) + ft_strlen(s2);
-	result = (char *)malloc(sizeof (char) *(len + 1));
-	if (result == 0)
-		return (NULL);
+	lst = first;
 	i = 0;
-	while (s1[i])
+	while (lst)
 	{
-		result[i] = s1[i];
-		i++;
+		j = 0;
+		while (((char *)lst->content)[j] != '\n' && ((char *)lst->content)[j])
+			result[i++] = ((char *)lst->content)[j++];
+		if (lst->eol == 1)
+		{
+			result[i++] = '\n';
+			break;
+			j++;
+		}
+		lst = lst->next;
 	}
-	j = 0;
-	while (s2[j])
-	{
-		result[i + j] = s2[j];
-		j++;
-	}
-	result[i + j] = '\0';
-	free (s1);
-	return (result);
+	result[i] = '\0';
+	i = 0;
+	free(str);
+	if (ft_strchr((char *)lst->content, '\n') && ((char *)lst->content)[j]);
+		str = ft_strdup((char *)lst->content + j);
 }
 
 char	*get_next_line(int fd)
@@ -139,48 +161,73 @@ char	*get_next_line(int fd)
 	static char	*str;
 	char		*result;
 	int			bytes_read;
+	t_list		*first;
+	t_list		*current;
+	int			size;
 
-	buf = (char *)calloc(BUFFER_SIZE + 1, sizeof (char));
+	buf = (char *)malloc((BUFFER_SIZE + 1) * sizeof (char));
 	if (buf == 0)
 		return (NULL);
 	if (str == 0)
 	{
 		bytes_read = read(fd, buf, BUFFER_SIZE);
+		buf[bytes_read] = '\0';
 		if (bytes_read == 0 || bytes_read == -1)
 		{
 			free(buf);
 			return (NULL);
 		}
-		str = (char *)calloc(1, 1);
-		str = append(str, buf);
+		first = ft_lstnew(ft_strdup(buf));
+		current = first;
 	}
-	while (strchr(str, '\n') && bytes_read)
+	else if (str != 0)
+		first = ft_lstnew(ft_strdup(str));
+	size = ft_strlen(first->content);
+	while (bytes_read && !current->eol)
 	{
 		bytes_read = read(fd, buf, BUFFER_SIZE);
-		str = append(str, buf);
+		if (bytes_read == 0)
+		{
+			current->eof = 1;
+			break ;
+		}
+		size += bytes_read;
+		ft_lstadd_back(&current, ft_lstnew(ft_strdup(buf)));
+		current = current->next;
 	}
-	if (bytes_read == 0)
-	{
-		
-	}
-	return (NULL);
+	if (current->eol)
+		size = size + ft_strchr(current->content, '\n') - (char *)current->content;
+	result = (char *)malloc(sizeof (char) * (size + 1));
+	printf("size : %d\n", size);
+	ft_lstprint(first);
+	extract_strs(first, result, str);
+	ft_lstclear(&first, &free);
+	return (result);
 }
 
 #include <fcntl.h>
 #include <stdio.h>
-#include <string.h>
 
 int	main()
 {
 	int	fd;
-	char buf[100];
+	char *buf;
 	int	r_read;
+	char *result;
 
-	memset(buf, 'a', 100);
 	fd = open("testfile", O_RDWR);
+	result = get_next_line(fd);
+	while (result)
+	{
+		printf("%s", result);
+		free(result);
+		result = get_next_line(fd);
+	}
+	/*
 	r_read = read(fd, buf, BUFFER_SIZE);
 	printf ("r_read :%d, the string %s\n", r_read, buf);
 	r_read = read(fd, buf, BUFFER_SIZE);
 	printf ("r_read :%d, the string %s\n", r_read, buf);
+	*/
 	return (0);
 }
