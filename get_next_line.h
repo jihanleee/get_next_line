@@ -6,7 +6,7 @@
 /*   By: jihalee <jihalee@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/05 19:52:52 by jihalee           #+#    #+#             */
-/*   Updated: 2023/05/09 23:10:01 by jihalee          ###   ########.fr       */
+/*   Updated: 2023/05/11 19:37:58 by jihalee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,9 @@
 
 typedef struct s_list
 {
-	void			*content;
+	char			*str;
 	int				eol;
-	int				eof;
+	int				size;
 	struct s_list	*next;
 }				t_list;
 
