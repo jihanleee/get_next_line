@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: jihalee <jihalee@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/09 15:50:05 by jihalee           #+#    #+#             */
-/*   Updated: 2023/05/11 21:02:56 by jihalee          ###   ########.fr       */
+/*   Updated: 2023/05/11 21:16:52 by jihalee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 int	add_to_list(char *buf, t_list **list)
 {
@@ -107,18 +107,18 @@ char	*extract_line(t_list *list, int size, t_list **prev)
 
 char	*get_next_line(int fd)
 {
-	static t_list	*prevlist;
+	static t_list	*prevlist[1024];
 	t_list			*first;
 	char			*result;
 
-	first = prevlist;
+	first = prevlist[fd];
 	if (fd < 0)
 		return (NULL);
 	if (make_list(fd, &first) == 0)
 		return (NULL);
 	if (first == 0)
 		return (NULL);
-	result = extract_line(first, get_size(first), &prevlist);
+	result = extract_line(first, get_size(first), &(prevlist[fd]));
 	return (result);
 }
 /*
