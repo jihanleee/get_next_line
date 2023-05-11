@@ -6,7 +6,7 @@
 /*   By: jihalee <jihalee@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/09 15:50:05 by jihalee           #+#    #+#             */
-/*   Updated: 2023/05/11 19:41:16 by jihalee          ###   ########.fr       */
+/*   Updated: 2023/05/11 20:50:31 by jihalee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,6 @@ void	ft_lstadd_back(t_list **lst, t_list *new)
 
 int	add_to_list(char *buf, t_list **list)
 {
-	char	*str;
 	int		i;
 	int		j;
 	int		eol_found;
@@ -137,9 +136,9 @@ int	make_list(int fd, t_list **list)
 	while (1)
 	{
 		size_read = read(fd, buf, BUFFER_SIZE);
-		buf[size_read] = '\0';
 		if (size_read <= 0)
 			break;
+		buf[size_read] = '\0';
 		if (add_to_list(buf, list) == 1)
 			break;
 	}
@@ -169,6 +168,49 @@ void	ft_lstclear(t_list **lst, void (*del)(void *))
 	*lst = 0;
 }
 
+int	get_size(t_list *list)
+{
+	int		size;
+
+	size = 0;
+	while (list)
+	{
+		size += list->size;
+		if (list->eol)
+			break;
+		list = list->next;
+	}
+	return (size);
+}
+
+char	*extract_line(t_list *list, int size, t_list **prev)
+{
+	char	*result;
+	int		i;
+	int		j;
+	int		eol;
+
+	result = (char *)malloc(sizeof (char) * (size + 1));
+	if (result == 0)
+		return (NULL);
+	i = 0;
+	while (list)
+	{
+		eol = list->eol;
+		*prev = list->next;
+		j = 0;
+		while (list->str[j])
+			result[i++] = list->str[j++];
+		free(list->str);
+		free(list);
+		if (eol)
+			break;
+		list = *prev;
+	}
+	result[i] = 0;
+	return (result);
+}
+
 char	*get_next_line(int fd)
 {
 	static t_list	*prevlist;
@@ -179,16 +221,24 @@ char	*get_next_line(int fd)
 	if (fd < 0)
 		return (NULL);
 	if (make_list(fd, &first) == 0)
-		return (0);
-	ft_lstprint(first);
-	ft_lstclear(&first, free);
+		return (NULL);
+	if (first == 0)
+		return (NULL);
+	result = extract_line(first, get_size(first), &prevlist);
+	return (result);
 }
-
+/*
 #include <fcntl.h>
 int	main()
 {
-	int	fd;
+	int		fd;
+	char	*result;
 
 	fd = open ("testfile", O_RDWR);
-	get_next_line(fd);
+	while(result = get_next_line(fd))
+	{
+		printf("%s\n", result);
+		free(result);
+	}
 }
+*/
