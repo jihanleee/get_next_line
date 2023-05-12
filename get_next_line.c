@@ -6,7 +6,7 @@
 /*   By: jihalee <jihalee@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/09 15:50:05 by jihalee           #+#    #+#             */
-/*   Updated: 2023/05/12 14:41:57 by jihalee          ###   ########.fr       */
+/*   Updated: 2023/05/12 15:06:43 by jihalee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,20 +132,3 @@ char	*get_next_line(int fd)
 	result = extract_line(first, get_size(first), &prevlist);
 	return (result);
 }
-/*
-#include <fcntl.h>
-#include <stdio.h>
-int	main()
-{
-	int		fd;
-	char	*result;
-
-	fd = open ("testfile", O_RDWR);
-	result = get_next_line(fd);
-	printf("%s.", result);
-	char c = 0; read(fd, &c, 1);
-	read(fd, &c, 1);
-	read(fd, &c, 1);
-	printf("%c", c);
-}
-*/
