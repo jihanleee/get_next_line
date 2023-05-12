@@ -6,7 +6,7 @@
 /*   By: jihalee <jihalee@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/05 19:52:52 by jihalee           #+#    #+#             */
-/*   Updated: 2023/05/11 20:58:20 by jihalee          ###   ########.fr       */
+/*   Updated: 2023/05/12 14:39:11 by jihalee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 # include <unistd.h>
 # include <stdlib.h>
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 1
+#  define BUFFER_SIZE 42
 # endif
 
 typedef struct s_list
@@ -27,14 +27,14 @@ typedef struct s_list
 }				t_list;
 
 char	*get_next_line(int fd);
-size_t	ft_strlen(const char *s);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
-t_list	*ft_lstnew(char *str, int size);
-void	ft_lstadd_back(t_list **lst, t_list *new);
-int		add_to_list(char *buf, t_list **list);
+void	find_nl(char *buf, int *i, int *j, int *eol_found);
+int		add_to_list(char *buf, t_list **list, t_list **current);
 int		make_list(int fd, t_list **list);
 int		get_size(t_list *list);
 char	*extract_line(t_list *list, int size, t_list **prev);
-char	*get_next_line(int fd);
+t_list	*ft_lstlast(t_list *lst);
+t_list	*ft_lstnew(char *str, int size);
+void	ft_lstclear(t_list **lst, void (*del)(void *));
 
 #endif

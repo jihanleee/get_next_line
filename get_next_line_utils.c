@@ -6,42 +6,22 @@
 /*   By: jihalee <jihalee@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/11 20:56:22 by jihalee           #+#    #+#             */
-/*   Updated: 2023/05/11 20:59:56 by jihalee          ###   ########.fr       */
+/*   Updated: 2023/05/12 14:41:47 by jihalee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
-size_t	ft_strlen(const char *s)
-{
-	size_t	i;
-
-	i = 0;
-	while (s[i])
-		i++;
-	return (i);
-}
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
 	char	*sub;
 	size_t	i;
 
-	if (start >= ft_strlen(s))
-	{
-		sub = (char *)malloc(sizeof (char) * 1);
-		if (sub != 0)
-			sub[0] = '\0';
-		return (sub);
-	}
-	else if (len > ft_strlen(s + start))
-		sub = (char *)malloc(sizeof (char) * (ft_strlen(s + start) + 1));
-	else
-		sub = (char *)malloc(sizeof (char) * (len + 1));
+	sub = (char *)malloc(sizeof (char) * (len + 1));
 	if (sub == 0)
 		return (NULL);
 	i = 0;
-	while (i < len && s[start + i] && start < ft_strlen(s))
+	while (i < len && s[start + i])
 	{
 		sub[i] = s[(size_t)start + i];
 		i++;
@@ -54,6 +34,8 @@ t_list	*ft_lstnew(char *str, int size)
 {
 	t_list	*new;
 
+	if (str == 0)
+		return (NULL);
 	new = (t_list *)malloc(sizeof (t_list));
 	if (new == 0)
 		return (NULL);
@@ -67,16 +49,46 @@ t_list	*ft_lstnew(char *str, int size)
 	return (new);
 }
 
-void	ft_lstadd_back(t_list **lst, t_list *new)
+t_list	*ft_lstlast(t_list *lst)
 {
-	if (lst == 0 || new == 0)
+	if (lst == 0)
+		return (0);
+	while (lst->next)
+		lst = lst->next;
+	return (lst);
+}
+
+void	ft_lstclear(t_list **lst, void (*del)(void *))
+{
+	t_list	*current;
+	t_list	*next;
+
+	if (lst == 0)
 		return ;
-	if (*lst == 0)
-		*lst = new;
-	else
+	if (del == 0)
+		return ;
+	current = *lst;
+	while (current)
 	{
-		while ((*lst)->next)
-			lst = &((*lst)->next);
-		(*lst)->next = new;
+		next = current->next;
+		del(current->str);
+		free(current);
+		current = next;
 	}
+	*lst = 0;
+}
+
+int	get_size(t_list *list)
+{
+	int		size;
+
+	size = 0;
+	while (list)
+	{
+		size += list->size;
+		if (list->eol)
+			break ;
+		list = list->next;
+	}
+	return (size);
 }
