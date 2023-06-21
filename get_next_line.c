@@ -6,7 +6,7 @@
 /*   By: jihalee <jihalee@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/09 15:50:05 by jihalee           #+#    #+#             */
-/*   Updated: 2023/05/12 15:06:43 by jihalee          ###   ########.fr       */
+/*   Updated: 2023/06/21 19:58:29 by jihalee          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,21 +81,21 @@ int	make_list(int fd, t_list **list)
 	return (1);
 }
 
-char	*extract_line(t_list *list, int size, t_list **prev)
+char	*extract_line(t_list *list, t_list **first)
 {
 	char	*result;
 	int		i;
 	int		j;
 	int		eol;
 
-	result = (char *)malloc(sizeof (char) * (size + 1));
+	result = (char *)malloc(sizeof (char) * (get_size(*first) + 1));
 	if (result == 0)
-		return (NULL);
+		return (ft_lstclear(first, free), NULL);
 	i = 0;
 	while (list)
 	{
 		eol = list->eol;
-		*prev = list->next;
+		*first = list->next;
 		j = 0;
 		while (list->str[j])
 			result[i++] = list->str[j++];
@@ -103,7 +103,7 @@ char	*extract_line(t_list *list, int size, t_list **prev)
 		free(list);
 		if (eol)
 			break ;
-		list = *prev;
+		list = *first;
 	}
 	result[i] = 0;
 	return (result);
@@ -111,24 +111,22 @@ char	*extract_line(t_list *list, int size, t_list **prev)
 
 char	*get_next_line(int fd)
 {
-	static t_list	*prevlist;
-	t_list			*first;
+	static t_list	*list;
 	char			*result;
 	int				r_makelist;
 
-	first = prevlist;
 	if (fd < 0)
 		return (NULL);
-	r_makelist = make_list(fd, &first);
+	r_makelist = make_list(fd, &list);
 	if (r_makelist == 0)
 		return (NULL);
 	if (r_makelist == -1)
 	{
-		ft_lstclear(&first, free);
+		ft_lstclear(&list, free);
 		return (NULL);
 	}
-	if (first == 0)
+	if (list == 0)
 		return (NULL);
-	result = extract_line(first, get_size(first), &prevlist);
+	result = extract_line(list, &list);
 	return (result);
 }
